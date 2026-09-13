@@ -16,7 +16,7 @@ export const SITE = {
    * Paste it between the quotes. Until then the form stays disabled
    * and the page shows the direct email address instead.
    */
-  web3formsKey: '',
+  web3formsKey: 'e569f9eb-5d0b-467a-b44b-9c7b8e1f5b9b',
 } as const;
 
 export const FORM_ENDPOINT = 'https://api.web3forms.com/submit';
