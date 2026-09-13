@@ -1,0 +1,114 @@
+<section class="section">
+  <div class="wrap connect">
+    <article class="card prose">
+      <h1>Connect</h1>
+
+      <p class="lede">
+        City Council members represent their neighbors. If you have a concern, question, or point of
+        view on a city issue, I want to hear from you! Please send me an email at
+        <a [href]="'mailto:' + site.email">{{ site.email }}</a
+        >.
+      </p>
+
+      <p>
+        If you’d like to get involved in my write-in campaign by hosting a lawn sign or talking with
+        your neighbors about my candidacy, please drop me a line at
+        <a [href]="'mailto:' + site.email">{{ site.email }}</a
+        >.
+      </p>
+
+      <p class="thanks">Thank you!</p>
+    </article>
+
+    <div class="card card--sky">
+      <h2>Send a message</h2>
+
+      <form novalidate (ngSubmit)="submit()" [formGroup]="form">
+        <div class="honeypot" aria-hidden="true">
+          <label for="botcheck">Leave this field empty</label>
+          <input id="botcheck" type="text" tabindex="-1" autocomplete="off" formControlName="botcheck" />
+        </div>
+
+        <div class="form__field">
+          <label class="form__label" for="name">Name <span aria-hidden="true">*</span></label>
+          <input
+            class="form__input"
+            [class.is-invalid]="invalid('name')"
+            id="name"
+            type="text"
+            autocomplete="name"
+            formControlName="name"
+            [attr.aria-invalid]="invalid('name')"
+            aria-describedby="name-error"
+          />
+          @if (invalid('name')) {
+            <span class="form__error" id="name-error">Please add your name.</span>
+          }
+        </div>
+
+        <div class="form__field">
+          <label class="form__label" for="email">Email <span aria-hidden="true">*</span></label>
+          <input
+            class="form__input"
+            [class.is-invalid]="invalid('email')"
+            id="email"
+            type="email"
+            autocomplete="email"
+            formControlName="email"
+            [attr.aria-invalid]="invalid('email')"
+            aria-describedby="email-error"
+          />
+          @if (invalid('email')) {
+            <span class="form__error" id="email-error">
+              Please add an email address Ashley can reply to.
+            </span>
+          }
+        </div>
+
+        <div class="form__field">
+          <label class="form__label" for="message">Message <span aria-hidden="true">*</span></label>
+          <textarea
+            class="form__textarea"
+            [class.is-invalid]="invalid('message')"
+            id="message"
+            rows="6"
+            formControlName="message"
+            [attr.aria-invalid]="invalid('message')"
+            aria-describedby="message-error"
+          ></textarea>
+          @if (invalid('message')) {
+            <span class="form__error" id="message-error">
+              Please add a little more so Ashley knows how to help.
+            </span>
+          }
+        </div>
+
+        @if (formEnabled) {
+          <button class="btn btn--primary" type="submit" [disabled]="sending()">
+            {{ sending() ? 'Sending…' : 'Send message' }}
+          </button>
+        } @else {
+          <button class="btn btn--primary" type="button" disabled>Send message</button>
+          <p class="form__note">
+            The form isn’t connected yet. Until it is, email
+            <a [href]="'mailto:' + site.email">{{ site.email }}</a> directly.
+          </p>
+        }
+
+        <div aria-live="polite">
+          @if (state() === 'sent') {
+            <p class="form__status form__status--ok">
+              Thank you — your message is on its way. Ashley will be in touch soon.
+            </p>
+          }
+          @if (state() === 'error') {
+            <p class="form__status form__status--err">
+              Something went wrong sending that. Please email
+              <a [href]="'mailto:' + site.email">{{ site.email }}</a> instead.
+            </p>
+          }
+        </div>
+      </form>
+    </div>
+  </div>
+</section>
