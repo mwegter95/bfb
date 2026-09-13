@@ -311,7 +311,16 @@ p:last-child { margin-bottom: 0; }
 .hero { background: var(--green); }
 .hero__img {
   width: 100%;
-  height: auto;
+  /* The art carries 146px of empty green above "WRITE IN" and a shadow tail
+     below the type. This trims 112px off each end (rows 112–967 of the 1080),
+     pulling the message up under the navbar and putting the whole hero above
+     the fold from a 13" laptop up to a 1080p display. "FOR CITY COUNCIL" ends
+     at row 920, so the type is never touched.
+     Cover scales by width here, so the 5.885% text inset — and every left edge
+     that hangs off it — is unaffected. Retune with `aspect-ratio` alone. */
+  height: auto; /* required, or the img's height attribute beats aspect-ratio */
+  aspect-ratio: 1920 / 855;
+  object-fit: cover;
 }
 
 /* ------------------------------------------------------------
@@ -361,17 +370,6 @@ p:last-child { margin-bottom: 0; }
   }
 }
 
-.band blockquote {
-  margin: 0 auto;
-  max-width: 22em;
-  font-size: clamp(1.25rem, 1rem + 1.15vw, 1.85rem);
-  line-height: 1.44;
-  font-variation-settings: "SOFT" 70, "WONK" 0;
-  text-align: center;
-  text-wrap: pretty;
-}
-.band blockquote q { quotes: "\201C" "\201D"; color: var(--sky); font-style: italic; }
-
 /* ------------------------------------------------------------
    Meet Ashley — one card, portrait floated into the top-left so the
    copy sets beside it and then runs full width underneath.
@@ -415,6 +413,22 @@ p:last-child { margin-bottom: 0; }
     clear: both;
   }
   .bio > .btn-row { clear: left; }
+}
+
+/* Ashley's closing thought — full width under the photo, a shade larger than
+   the body copy, no rules or ornament. */
+.pullquote {
+  clear: left;
+  margin: clamp(1.75rem, 3vw, 2.75rem) 0 0;
+  max-width: 42em;
+  font-size: clamp(1.12rem, 1rem + 0.62vw, 1.45rem);
+  line-height: 1.46;
+  font-variation-settings: "SOFT" 70, "WONK" 0;
+  text-wrap: pretty;
+}
+.pullquote q {
+  quotes: "\201C" "\201D";
+  font-style: italic;
 }
 
 @media (max-width: 759px) {
