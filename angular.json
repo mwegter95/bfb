@@ -6,7 +6,7 @@
   },
   "newProjectRoot": "projects",
   "projects": {
-    "belisleforbirchwood": {
+    "bfb": {
       "projectType": "application",
       "schematics": {
         "@schematics/angular:component": {
@@ -85,10 +85,10 @@
           "builder": "@angular/build:dev-server",
           "configurations": {
             "production": {
-              "buildTarget": "belisleforbirchwood:build:production"
+              "buildTarget": "bfb:build:production"
             },
             "development": {
-              "buildTarget": "belisleforbirchwood:build:development"
+              "buildTarget": "bfb:build:development"
             }
           },
           "defaultConfiguration": "development"

@@ -13,7 +13,7 @@ import { copyFile, readFile, writeFile } from 'node:fs/promises';
 import { join } from 'node:path';
 
 const ORIGIN = 'https://belisleforbirchwood.com';
-const dist = join(process.cwd(), 'dist', 'belisleforbirchwood');
+const dist = join(process.cwd(), 'dist', 'bfb');
 const out = join(dist, 'browser');
 
 await copyFile(join(out, 'index.csr.html'), join(out, '404.html'));

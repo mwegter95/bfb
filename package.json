@@ -1,11 +1,11 @@
 {
-  "name": "belisleforbirchwood",
+  "name": "bfb",
   "version": "0.0.0",
   "scripts": {
     "ng": "ng",
     "start": "ng serve --open",
     "build": "ng build && node scripts/postbuild.mjs",
-    "preview": "npm run build && npx --yes http-server dist/belisleforbirchwood/browser -p 4200 -o",
+    "preview": "npm run build && npx --yes http-server dist/bfb/browser -p 4200 -o",
     "watch": "ng build --watch --configuration development"
   },
   "private": true,
