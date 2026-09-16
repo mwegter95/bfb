@@ -1,0 +1,4 @@
+# Everything is crawlable. Googlebot-Image must be able to reach the favicon
+# and Googlebot the home page, or the favicon won't show in search results.
+User-agent: *
+Allow: /
