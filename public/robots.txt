@@ -2,3 +2,5 @@
 # and Googlebot the home page, or the favicon won't show in search results.
 User-agent: *
 Allow: /
+
+Sitemap: https://belisleforbirchwood.com/sitemap.xml

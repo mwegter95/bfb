@@ -50,10 +50,37 @@ Pushing to `main` builds and publishes automatically via
 
 1. Create the repo and push this project to `main`.
 2. Settings → Pages → **Source: GitHub Actions**.
-3. Settings → Pages → Custom domain: `belisleforbirchwood.com`, then tick
-   **Enforce HTTPS** once the certificate is issued (can take up to ~24h).
+3. Settings → Pages → Custom domain: `belisleforbirchwood.com`. This is the only place
+   the domain is set.
+4. Wait for the certificate, then tick **Enforce HTTPS**. The checkbox stays greyed out
+   until the certificate exists — it isn't a separate switch to find.
 
-`public/CNAME` already carries the domain, so it survives every deploy.
+**`public/CNAME` does nothing here.** GitHub's docs: "If you are publishing from a custom
+GitHub Actions workflow, no `CNAME` file is created, and any existing `CNAME` file is
+ignored and is not required." The file is kept only as a fallback in case this ever
+switches to branch-based publishing. Pushing does **not** disturb a pending certificate.
+
+### If HTTPS never turns on
+
+Symptom: the site loads fine over http, https shows an untrusted certificate for
+`*.github.io`, and **Enforce HTTPS** is greyed out. That means the certificate was never
+issued — DNS is not the problem if the DNS check is green.
+
+The fix, from GitHub's docs: Settings → Pages → **Remove** next to the custom domain,
+retype it, **Save**. That "will cancel and restart the provisioning process." Do it if
+provisioning hasn't finished several minutes after the DNS check goes green.
+
+Worth checking before assuming it's stuck:
+
+```bash
+# which certificate is actually being served
+curl -sv https://belisleforbirchwood.com -o /dev/null 2>&1 | grep -i "subject:"
+#   CN=*.github.io  -> no certificate issued yet
+#   CN=belisleforbirchwood.com -> issued; tick Enforce HTTPS
+
+# has any CA logged a certificate for the domain
+curl -s "https://crt.sh/?q=belisleforbirchwood.com&output=json" | head -c 400
+```
 
 **One-time setup in Squarespace DNS** (Domains → belisleforbirchwood.com → DNS Settings →
 add a custom record). Delete any existing A records for the root/`@` host first:
@@ -91,9 +118,39 @@ src/
 scripts/postbuild.mjs   copies index.html to 404.html for deep links
 ```
 
-`scripts/postbuild.mjs` matters: GitHub Pages has no server-side routing, so a hard
-refresh on `/meet-ashley` would 404. Pages serves `404.html` for unknown paths, and
-since that file is the app, the Angular router picks the URL up and renders correctly.
+### Prerendering
+
+`angular.json` sets `outputMode: "static"` with `server: "src/main.server.ts"`, so every
+route is rendered to a real HTML file at build time:
+
+```
+dist/belisleforbirchwood/browser/
+  index.html              /
+  meet-ashley/index.html  /meet-ashley/
+  connect/index.html      /connect/
+  404.html                everything else
+  sitemap.xml
+```
+
+This matters for search. Before, `/meet-ashley` and `/connect` were served by `404.html`
+with an **HTTP 404 status** — visitors saw the right page, but crawlers saw a 404 and
+wouldn't index them. Now they return 200 with their real `<title>`, description and
+canonical already in the HTML, rather than only after Angular boots.
+
+No server runs at runtime; the output is still plain static files.
+
+`scripts/postbuild.mjs` then:
+
+- copies `index.csr.html` (the un-prerendered shell) to **404.html**, so a genuinely
+  unknown URL boots the app and lets the router redirect, rather than showing Home's
+  content under the wrong URL;
+- writes **sitemap.xml** from `prerendered-routes.json`, so it can't drift from what was
+  actually deployed or list a URL that 404s. URLs use the trailing-slash directory form,
+  which is what returns 200 — the bare path only 301s to it.
+
+`public/robots.txt` points at the sitemap. The canonical tag is set in `src/app/app.ts`;
+the origin is hardcoded there and in `scripts/postbuild.mjs` — change both if the domain
+ever moves.
 
 ### Colours
 
