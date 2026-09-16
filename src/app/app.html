@@ -25,7 +25,13 @@
 </main>
 
 <footer class="footer">
-  <div class="wrap">
+  <!--
+    The "prepared and paid for" disclaimer has to stay on the page, but Google was
+    pulling the street address and email into the search snippet. data-nosnippet
+    excludes this block from snippets; it only works on span, div and section, and
+    must be present in the served HTML (never toggled by JS).
+  -->
+  <div class="wrap" data-nosnippet>
     <p>{{ site.disclaimer }}</p>
     <p>{{ site.address }}</p>
     <p><a [href]="'mailto:' + site.email">{{ site.email }}</a></p>
