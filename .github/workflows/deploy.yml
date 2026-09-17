@@ -42,3 +42,49 @@ jobs:
     steps:
       - id: deployment
         uses: actions/deploy-pages@v4
+
+  # Tell IndexNow (Bing, Yandex, and other participating engines) what changed.
+  # Reads the freshly deployed sitemap rather than a hardcoded list, so adding a
+  # route needs no change here. Never fails the deploy — a search-engine ping is
+  # not worth breaking a release over.
+  notify-indexnow:
+    needs: deploy
+    runs-on: ubuntu-latest
+    steps:
+      - name: Submit deployed URLs to IndexNow
+        env:
+          HOST: belisleforbirchwood.com
+          INDEXNOW_KEY: a6b714497d54426c99454e1629e778c4
+        run: |
+          set -uo pipefail
+          sleep 30   # let the new deploy reach the edge
+
+          URLS=$(curl -sS --retry 3 --retry-delay 5 "https://$HOST/sitemap.xml" \
+                 | grep -oE '<loc>[^<]+</loc>' | sed -E 's|</?loc>||g')
+
+          if [ -z "$URLS" ]; then
+            echo "::warning::could not read sitemap; skipping IndexNow"
+            exit 0
+          fi
+
+          PAYLOAD=$(jq -n \
+            --arg host "$HOST" \
+            --arg key "$INDEXNOW_KEY" \
+            --arg keyLocation "https://$HOST/$INDEXNOW_KEY.txt" \
+            --argjson urlList "$(printf '%s\n' $URLS | jq -R . | jq -s .)" \
+            '{host:$host,key:$key,keyLocation:$keyLocation,urlList:$urlList}')
+
+          echo "$PAYLOAD"
+
+          CODE=$(curl -sS -o /tmp/indexnow.out -w '%{http_code}' -X POST \
+            -H 'Content-Type: application/json; charset=utf-8' \
+            --data "$PAYLOAD" https://api.indexnow.org/IndexNow)
+
+          echo "IndexNow HTTP $CODE"
+          cat /tmp/indexnow.out 2>/dev/null || true
+
+          case "$CODE" in
+            200|202) echo "submitted $(printf '%s\n' $URLS | wc -l) URLs" ;;
+            403) echo "::warning::403 — key file not reachable at https://$HOST/$INDEXNOW_KEY.txt" ;;
+            *)   echo "::warning::IndexNow returned $CODE" ;;
+          esac
